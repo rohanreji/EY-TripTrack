@@ -1,0 +1,107 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:pixlui="http://schemas.android.com/apk/com.neopixl.pixlui"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+     <ViewFlipper
+         android:id="@+id/viewFlipper"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:layout_centerHorizontal="true"
+         android:layout_centerVertical="true" >
+
+         <RelativeLayout
+             android:id="@+id/relativeLayout1"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:layout_marginLeft="5dp"
+             android:layout_marginRight="5dp"
+       
+             android:background="@drawable/fragmentback" >
+
+             <EditText
+                 android:id="@+id/textView1"
+                 android:layout_width="300dp"
+                 android:layout_height="40dp"
+                 android:layout_alignParentTop="true"
+                 android:layout_centerHorizontal="true"
+                 android:background="@drawable/textinputborder"
+                 android:ems="10"
+                 android:hint="login id"
+                 android:paddingLeft="5dp" />
+
+             <EditText
+                 android:id="@+id/textView2"
+                 android:layout_width="300dp"
+                 android:layout_height="40dp"
+                 android:layout_below="@id/textView1"
+                 android:layout_centerHorizontal="true"
+                 android:layout_marginTop="10dp"
+                 android:background="@drawable/textinputborder"
+                 android:ems="10"
+                 android:hint="password"
+                 android:inputType="textPassword"
+                 android:paddingLeft="5dp" />
+
+             <Button
+                 android:id="@+id/button1"
+                 android:layout_width="300dp"
+                 android:layout_height="wrap_content"
+                 android:layout_below="@+id/textView2"
+                 android:layout_centerHorizontal="true"
+                 android:layout_marginTop="10dp"
+                 android:onClick="clicked"
+                 android:text="login"
+                 android:textColor="#ffffff" />
+
+             <TextView
+                 android:id="@+id/textView3"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_alignParentRight="true"
+                 android:layout_below="@+id/button1"
+                 android:layout_marginTop="10dp"
+                 android:text="@string/valuess"
+                 android:textAppearance="?android:attr/textAppearanceSmall"
+                 android:textColor="#2980b9" />
+
+           
+
+         </RelativeLayout>
+
+         <RelativeLayout
+             android:id="@+id/relativeLayout3"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:layout_marginLeft="5dp"
+             android:layout_marginRight="5dp"
+              >
+
+             <TextView
+                 android:id="@+id/textView9"
+                 android:layout_width="300dp"
+                 android:layout_height="wrap_content"
+                 android:layout_alignParentTop="true"
+                 android:layout_centerHorizontal="true"
+                 android:background="#2c3e50"
+                 android:text="Not On"
+                 android:paddingLeft="5dp" 
+                  android:textAppearance="?android:attr/textAppearanceMedium"/>
+             
+         </RelativeLayout>
+     </ViewFlipper>
+
+     <TextView
+         android:id="@+id/textView4"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_above="@+id/viewFlipper"
+         android:layout_alignParentLeft="true"
+         android:layout_marginBottom="17dp"
+         android:layout_marginLeft="14dp"
+         android:text="Not Logged."
+         android:textColor="#fff"
+         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>
