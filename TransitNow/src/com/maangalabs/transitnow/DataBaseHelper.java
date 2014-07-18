@@ -133,37 +133,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	}
 	
 	
-	private class LongOperation extends AsyncTask<SQLiteDatabase, Void, String> {
-
-        @Override
-        protected String doInBackground(SQLiteDatabase... params) {
-        
-        	 try {
-     		SQLiteDBDeploy.deploy(params[0], "http://ingenious-camel.googlecode.com/svn/trunk/SQLiteDBDeployer/assets/northwind.zip");
-        		
-        	 } 
-        	 catch (Exception e) {
-     			// TODO Auto-generated catch block
-     			
-     			
-     			e.printStackTrace();
-     		}
-            return "Executed";
-        }
-       
-        
-        @Override
-        protected void onPostExecute(String result) {
-          
-        }
-
-        @Override
-        protected void onPreExecute() {}
-
-        @Override
-        protected void onProgressUpdate(Void... values) {}
-    }
-    
+	
 	
 	
 	/*

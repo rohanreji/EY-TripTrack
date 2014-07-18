@@ -2,18 +2,20 @@ package com.maangalabs.transitnow;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+
+import com.facebook.*;
+import com.facebook.model.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,7 +24,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.ByteArrayBuffer;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,16 +41,14 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,18 +61,17 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
-import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.MapFragment;
 
 
-@SuppressLint("NewApi") public class MainActivity extends FragmentActivity
+@SuppressLint("NewApi") 
+public class MainActivity extends FragmentActivity
 {
 	public double lati[];
 	LatLng point1[];
-
+	
 	public double longi[];
 	public SharedPreferences preferences;
 	MapView mapView;
@@ -88,28 +87,32 @@ import com.google.android.gms.maps.MapFragment;
     TextView t9;
     private GoogleMap googleMap;
     @Override
+    public void onBackPressed()
+   {
+    
+    	android.os.Process.killProcess(android.os.Process.myPid());     	
+   }
+   
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_main);
+    	//ColorDrawable cd = new ColorDrawable(0xD7DF0100);
+    	//getActionBar().setBackgroundDrawable(cd);
+    	
+    	/*
+    	 * setting the viewpager up, now it points to 0th element.
+    	 */
         viewPager = (ViewPager) findViewById(R.id.pager);
         
         mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
       
         viewPager.setAdapter(mAdapter);
         viewPager.setCurrentItem(0);
-
-	
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+   
+        /*
+         * Initialize the map, and set it point using camera update...
+         */
       
         try {
             	initilizeMap();
@@ -130,22 +133,24 @@ import com.google.android.gms.maps.MapFragment;
         }
         
         
-    
+        
         
 
     	/*
-    	 * Diaplays the route for the loged in customer.
+    	 * Check whether customer is logged in or not using shared preferences.
     	 */
         
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
     	int flag = preferences.getInt("f", 0);
-  	
-    	
     	
     	if(flag!=0)
     	{
+    		/*
+    		 * use this to check the status of the database. using some api call whether updated or not.
+    		 */
     		
-    		DataBaseHelper db = new DataBaseHelper(MainActivity.this);
+    		
+    	/*	DataBaseHelper db = new DataBaseHelper(MainActivity.this);
     		lati=new double[db.getContactsCount()];
     		longi=new double[db.getContactsCount()];
     		lati=db.getLati();
@@ -167,10 +172,19 @@ import com.google.android.gms.maps.MapFragment;
 
     		googleMap.addMarker(options);
     		addMarkers();
-    		db.close(); 
+    		db.close(); */
     		
+    		
+    		new GetDbVersion().execute("");
     	}
-        
+    	else
+    	{
+    		Toast.makeText(getApplicationContext(), "Not Logged", Toast.LENGTH_SHORT).show();
+    		
+    		/*
+    		 * Call the mmmmaaaain activity
+    		 */
+    	}
        
       
         
@@ -207,6 +221,8 @@ import com.google.android.gms.maps.MapFragment;
             }
         });
        
+        
+     
     }
 
     
@@ -236,81 +252,7 @@ import com.google.android.gms.maps.MapFragment;
     
     
     
-    public void clicked(View v)
-    {
-    	/*
-    	 * on Login Display the route with the databse , move this code to LongOperation's postexecute.
-    	 */
-    	DataBaseHelper db = new DataBaseHelper(MainActivity.this);
-    	double lati1[]={8.502072,8.583205};
-    	double longi1[]={76.949892,76.878550};
-    	for(int h=0;h<lati1.length;h++)
-    	{
-    		db.addContact(lati1[h],longi1[h]);        
-    	}
-        Log.d("Name: ", db.getContactsCount()+"");
-        lati=new double[db.getContactsCount()];
-        longi=new double[db.getContactsCount()];
-        lati=db.getLati();
-        longi=db.getLongi();
-        MarkerOptions options = new MarkerOptions();
-        for(int i=0;i<db.getContactsCount();i++)
-        {
-        	options.position(new LatLng(lati[i],longi[i]));
-        }
-      
-       TextView t4=(TextView)findViewById(R.id.textView4);
-       t4.setText("Logged in");
-       googleMap.addMarker(options);
-       addMarkers();
-       db.close();
-        
-       
-       
-       
-        
-        
-       LongOperation l= new LongOperation();
-       l.execute(" ");
-       
-       
-       DataBaseHelper db1 = new DataBaseHelper(this);
-  	 double[]  lati2=new double[db.getContactsCount()];
-       double[] longi2=new double[db.getContactsCount()];
-       lati2=db1.getLati();
-       longi2=db1.getLongi();
-       db1.close();
-		
-       Geocoder geocoder = new Geocoder(this, Locale.getDefault());   
-       String result = null;
-       String result1=null;
-       try {
-            List<Address> list = geocoder.getFromLocation(
-           lati2[0],longi2[0], 1);
-            List<Address> list1 = geocoder.getFromLocation(
-   	             lati2[db1.getContactsCount()-1],longi2[db1.getContactsCount()-1], 1);
-          
-            if (list != null && list.size() > 0) {
-                 Address address = list.get(0);
-                  // sending back first address line and locality
-                  result = address.getAddressLine(0);
-                  result=result.substring(0, result.indexOf(","));
-            }
-            if(list1!=null && list1.size() > 0){
-          	  Address address = list1.get(0);
-                // sending back first address line and locality
-                result1 = address.getAddressLine(0);
-                result1=result1.substring(0, result1.indexOf(","));
-            }
-          	  
-       } catch (IOException e) {
-              Log.e("TAG", "Impossible to connect to Geocoder", e);
-        } 	
-       TextView t9=(TextView)findViewById(R.id.textView9);
-  		t9.setText(result+" - "+result1);
-    	
-    }
-    /*
+       /*
      * Sets the api for google maps for the given routes and return the url corresponding to given route.
      */
     private String getMapsApiDirectionsUrl() {
@@ -450,40 +392,117 @@ private class LongOperation extends AsyncTask<String, Void, String> {
            		/*
            		 * making the second viewflipper 
            		 */
-        		EditText t=(EditText)findViewById(R.id.textView1);
-        		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        		SharedPreferences.Editor editor = preferences.edit();
-       		 	editor.putInt("f",Integer.parseInt(t.getText().toString()));
-       		 	editor.commit();
-       		 	HomeFragment.vflipper.showNext();
-       		 	viewPager.setCurrentItem(0);
-       		 	Toast.makeText(getApplicationContext(), "LOGIN SUCCESSFULL! "+names, Toast.LENGTH_SHORT).show();
-       		 	RelativeLayout r=(RelativeLayout)findViewById(R.id.relativeLayout1);
-       		 	r.setVisibility(View.INVISIBLE);
-       		 	TextView t4=(TextView)findViewById(R.id.textView4);
-       		 	t4.setText("Logged in");
-       		 	this.cancel(true);
+        		
+       		 	
+       		 	Routes weather_data[] = new Routes[]
+	                      {
+	                          new Routes("Pattom","1:30 pm"),
+	                          
+	                      };
+       		 	RoutesAdapter adapter;
+	                     
+       		 	adapter = new RoutesAdapter(MainActivity.this,
+	                              R.layout.list_item_row_home, weather_data);
+	                     
+	                    // adapter.notifyDataSetChanged();
+	              
+	                     
+       		 	ListView listView1 = (ListView)findViewById(R.id.listView1);
+	                      
+	                  //  adapter.notifyDataSetChanged();
+       		 	listView1.setAdapter(adapter);
+       		 	
+       		 	new GetDbVersion().execute("");
+       		 	
+       		 /*
+       	    	 * on Login Display the route with the databse , move this code to LongOperation's postexecute.
+       	    	 */
+       	    	DataBaseHelper db = new DataBaseHelper(MainActivity.this);
+       	    	double lati1[]={8.502072,8.583205};
+       	    	double longi1[]={76.949892,76.878550};
+       	    	for(int h=0;h<lati1.length;h++)
+       	    	{
+       	    		db.addContact(lati1[h],longi1[h]);        
+       	    	}
+       	        Log.d("Name: ", db.getContactsCount()+"");
+       	        lati=new double[db.getContactsCount()];
+       	        longi=new double[db.getContactsCount()];
+       	        lati=db.getLati();
+       	        longi=db.getLongi();
+       	        MarkerOptions options = new MarkerOptions();
+       	        for(int i=0;i<db.getContactsCount();i++)
+       	        {
+       	        	options.position(new LatLng(lati[i],longi[i]));
+       	        }
+       	      
+       	      
+       	       googleMap.addMarker(options);
+       	       addMarkers();
+       	       db.close();
+       	       this.cancel(true);
      	   	}
         	/*
         	 * Avoid this code once api is set
         	 */
         	else
         	{
-        		EditText t=(EditText)findViewById(R.id.textView1);
+        		
+        		//comment this once api is set
+            	
+            	EditText t=(EditText)findViewById(R.id.textView1);
         		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         		SharedPreferences.Editor editor = preferences.edit();
         		editor.putInt("f",Integer.parseInt(t.getText().toString()));
-       		
-       		 	editor.commit();
+        		
+        		editor.commit();
 
         	
-       		 	HomeFragment.vflipper.showNext();
-       		 	viewPager.setCurrentItem(0);
-       		 	Toast.makeText(getApplicationContext(), "LOGIN SUCCESSFULL! "+names, Toast.LENGTH_SHORT).show();
-       		 	RelativeLayout r=(RelativeLayout)findViewById(R.id.relativeLayout1);
-      	   		r.setVisibility(View.INVISIBLE);
-      	   		TextView t4=(TextView)findViewById(R.id.textView4);
-      	   		t4.setText("Logged in");
+        		
+        	   		
+        	   	new GetDbVersion().execute("");
+        	   	Routes weather_data[] = new Routes[]
+ 	            {
+        	   			new Routes("Pattom","1:30 pm"),
+ 	            };
+     	        RoutesAdapter adapter;
+ 	                     
+     	        adapter = new RoutesAdapter(MainActivity.this,
+ 	                              R.layout.list_item_row_home, weather_data);
+ 	                     
+     	        // adapter.notifyDataSetChanged();
+ 	              
+ 	                     
+     	        ListView listView1 = (ListView)findViewById(R.id.listView1);
+ 	                      
+ 	                  //  adapter.notifyDataSetChanged();
+     	        listView1.setAdapter(adapter);
+        	   	
+          		 /*
+          	    	 * on Login Display the route with the databse , move this code to LongOperation's postexecute.
+          	    	 */
+          	    DataBaseHelper db = new DataBaseHelper(MainActivity.this);
+          	    double lati1[]={8.502072,8.583205};
+          	    double longi1[]={76.949892,76.878550};
+          	    for(int h=0;h<lati1.length;h++)
+          	    {
+          	    		db.addContact(lati1[h],longi1[h]);        
+          	    }
+          	    Log.d("Name: ", db.getContactsCount()+"");
+          	    lati=new double[db.getContactsCount()];
+          	    longi=new double[db.getContactsCount()];
+          	    lati=db.getLati();
+          	    longi=db.getLongi();
+          	    MarkerOptions options = new MarkerOptions();
+          	    for(int i=0;i<db.getContactsCount();i++)
+          	    {
+          	       	options.position(new LatLng(lati[i],longi[i]));
+          	    }
+          	      
+          	      
+          	    googleMap.addMarker(options);
+          	    addMarkers();
+          	    db.close();
+          	         	   		
       	   		this.cancel(true);
         		
         	}
@@ -566,10 +585,10 @@ private class LongOperation extends AsyncTask<String, Void, String> {
 		    if(haveNetworkConnection())
 		    {
 		    	ArrayList<LatLng> points = null;
-		      PolylineOptions polyLineOptions = null;
+		    	PolylineOptions polyLineOptions = null;
 		 
 		      // traversing through routes
-		      for (int i = 0; i < routes.size(); i++) {
+		    	for (int i = 0; i < routes.size(); i++) {
 		    	  points = new ArrayList<LatLng>();
 		    	  polyLineOptions = new PolylineOptions();
 		    	  List<HashMap<String, String>> path = routes.get(i);
@@ -584,13 +603,13 @@ private class LongOperation extends AsyncTask<String, Void, String> {
 		    	  }
 		    	  if(points!=null)
 		    	  {
-		    	  polyLineOptions.addAll(points);
-		    	  polyLineOptions.width(5);
-		    	  polyLineOptions.color(Color.BLUE);
+		    		  polyLineOptions.addAll(points);
+		    		  polyLineOptions.width(5);
+		    		  polyLineOptions.color(Color.BLUE);
 		    	  }
 		      }
 		      if(points!=null)
-		      googleMap.addPolyline(polyLineOptions);
+		    	  googleMap.addPolyline(polyLineOptions);
 		    }
 		    }
 		    }
@@ -611,5 +630,214 @@ private class LongOperation extends AsyncTask<String, Void, String> {
 			return haveConnectedWifi || haveConnectedMobile;
 			 }
 		  
-		
+	
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  /*
+		   * Download the database.
+		   */
+		  
+		  
+		  private class DownloadDb extends AsyncTask<String, String, String> {
+			  ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+			  
+			  
+		        @Override
+		        protected String doInBackground(String... params) {
+		        		try {
+		        		
+		        		URL url = new URL("http://192.168.0.38:1100/get_db");
+		        		URLConnection conexion = url.openConnection();
+		        		conexion.connect();
+
+		        		int lenghtOfFile = conexion.getContentLength();
+		        		Log.d("ANDRO_ASYNC", "Lenght of file: " + lenghtOfFile);
+		        		
+		        		InputStream input = new BufferedInputStream(url.openStream());
+		        		OutputStream output = new FileOutputStream("/sdcard/new.db");
+
+		        		byte data[] = new byte[1024];
+
+		        		long total = 0;
+		        		int count;
+		        			while ((count = input.read(data)) != -1) {
+		        				total += count;
+		        				publishProgress(""+(int)((total*100)/lenghtOfFile));
+		        				output.write(data, 0, count);
+		        			}
+
+		        			output.flush();
+		        			output.close();
+		        			input.close();
+		        		} catch (Exception e) {}
+		       		
+		        	return "Executed";
+		        }
+		        @Override
+		        protected void onPostExecute(String result) {
+		        	 if (dialog.isShowing()) {
+		                 dialog.dismiss();
+		                 
+		             }
+		        	 /*
+		        	  * saving the version in shared preferences.
+		        	  */
+		        	 
+		        	 
+		        	 	
+						
+		        	
+		        	
+		        /*	 File dbfile = new File("/sdcard/new.db" ); 
+		     		SQLiteDatabase  db1 = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
+		     		String selectQuery = "select stop_name,stop_id from stops order by stop_name;";
+		     		Cursor cursor = db1.rawQuery(selectQuery, null);
+		     		if (cursor.moveToFirst()) {
+		     			
+		     			Toast.makeText(getApplicationContext(),"ds: "+cursor.getString(0), Toast.LENGTH_SHORT).show();
+		     			
+		     		
+		     			}
+		     		else
+
+		     			Toast.makeText(getApplicationContext(),"es: ", Toast.LENGTH_SHORT).show();
+		     			
+		     			cursor.close();
+		     			db1.close();*/
+		        }
+
+		        @Override
+		        protected void onPreExecute() {
+		       	dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		        	dialog.setMessage("Progress start");
+		           dialog.show();
+		        }
+
+		        protected void onProgressUpdate(String... progress) {
+		   		 Log.d("ANDRO_ASYNC",progress[0]);
+		   		 dialog.setProgress(Integer.parseInt(progress[0]));
+		   	}
+		  }			
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  private class GetDbVersion extends AsyncTask<String, String, String> {
+			  
+			  String versi;
+			  
+		        @Override
+		        protected String doInBackground(String... params) {
+		        		try {
+		        		
+		        			/*
+				        	  * saving the version in shared preferences.
+				        	  */
+				        	 
+				        	 
+				        	 	StringBuilder builder = new StringBuilder();
+			            	    HttpClient client = new DefaultHttpClient();
+			            	    HttpGet httpGet = new HttpGet("http://192.168.0.38:1100/get_db_version");
+			            	    Log.d("tag1","http://192.168.0.38:1100/get_db_version");
+			            	    try {
+			            	      HttpResponse response = client.execute(httpGet);
+			            	      StatusLine statusLine = response.getStatusLine();
+			            	      int statusCode = statusLine.getStatusCode();
+			            	      if (statusCode == 200) {
+			            	    	  HttpEntity entity = response.getEntity();
+			            	    	  InputStream content = entity.getContent();
+			            	    	  BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+			            	    	  String line;
+			            	    	  while ((line = reader.readLine()) != null) {
+			            	    		  builder.append(line);
+			            	    		  //adding the line to origdevicename
+			            	    	  }        	        
+			            	      }
+			            	    } catch (ClientProtocolException e) {
+			            	    	e.printStackTrace();
+			            	    } catch (IOException e) {
+			            	    	e.printStackTrace();
+			            	    } 
+			               	    Log.d("checker",builder.toString());
+			            	    JSONObject jsonObj;
+								try {
+									jsonObj = new JSONObject(builder.toString());
+								
+									versi=jsonObj.getString("version");
+			        	       
+				       		 	
+								}
+								catch(Exception e)
+								{
+									
+								}
+		        		}
+		        		catch(Exception e)
+		        		{
+		        			
+		        		}
+		        		return "executed";
+		        }
+		        @Override
+		        protected void onPostExecute(String result) {
+		        	preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		         	String vers = preferences.getString("ver", "0");
+		        	if(!vers.equals(versi))
+		    		{
+		        		 preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+			        		SharedPreferences.Editor editor = preferences.edit();
+			        		
+			       		 	editor.putString("ver",vers);
+			       		 	editor.commit();
+			       		 	
+		        		new DownloadDb().execute(" ");
+		    		}
+		        	else
+		        	{
+		        		
+		        	}
+		        	
+		        	
+		        /*	 File dbfile = new File("/sdcard/new.db" ); 
+		     		SQLiteDatabase  db1 = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
+		     		String selectQuery = "select stop_name,stop_id from stops order by stop_name;";
+		     		Cursor cursor = db1.rawQuery(selectQuery, null);
+		     		if (cursor.moveToFirst()) {
+		     			
+		     			Toast.makeText(getApplicationContext(),"ds: "+cursor.getString(0), Toast.LENGTH_SHORT).show();
+		     			
+		     		
+		     			}
+		     		else
+
+		     			Toast.makeText(getApplicationContext(),"es: ", Toast.LENGTH_SHORT).show();
+		     			
+		     			cursor.close();
+		     			db1.close();*/
+		        }
+
+		        @Override
+		        protected void onPreExecute() {
+		       
+		        }
+
+		        protected void onProgressUpdate(String... progress) {
+		   		
+		   	}
+		  }			
+		  
+		  
  }

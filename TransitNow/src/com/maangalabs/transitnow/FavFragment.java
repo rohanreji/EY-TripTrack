@@ -20,6 +20,7 @@ import com.neopixl.pixlui.components.edittext.EditText;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -39,6 +40,10 @@ import android.widget.Toast;
 	String names="no cabs!";
 	View rootView;
 	CabAdapter adapter;
+	 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+     
+     Paint paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
+     Paint paint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -181,7 +186,25 @@ import android.widget.Toast;
 	        }
 
 	        @Override
-	        protected void onPreExecute() {}
+	        protected void onPreExecute() {
+	        	 Cabs weather_data[] = new Cabs[]
+	                      {
+	                          new Cabs("Loading.."),
+	                          
+	                      };
+	                     
+	         adapter = new CabAdapter(getActivity(),
+	                              R.layout.listview_item_row, weather_data);
+	                     
+	                    // adapter.notifyDataSetChanged();
+	              
+	                     
+	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView1);
+	                      
+	                  //  adapter.notifyDataSetChanged();
+	         listView1.setAdapter(adapter);
+	        	
+	        }
 
 	        @Override
 	        protected void onProgressUpdate(Void... values) {

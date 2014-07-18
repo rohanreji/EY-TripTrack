@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+  <ViewFlipper
+            android:id="@+id/view_flipper"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="6dip" >
+            <RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/welcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="164dp"
+        android:text="cannot reach you!"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/welcome"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/textinputborder"
+        android:ems="10"
+        android:hint="EY email id"
+        android:inputType="textEmailAddress"
+        android:paddingLeft="5dp" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/editText1"
+        android:layout_marginTop="26dp"
+        android:text="next"
+        android:background="#dacfcf"
+        android:onClick="clicks" />
+
+   
+
+ </RelativeLayout>
+ 
+             <RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+                    <TextView
+        android:id="@+id/welcome1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="164dp"
+        android:text="Enter the verification code"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/editText11"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/welcome1"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/textinputborder"
+        android:ems="10"
+        android:hint="Verification code"
+        android:paddingLeft="5dp" />
+
+    <Button
+        android:id="@+id/button11"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/editText11"
+        android:layout_marginTop="26dp"
+        android:text="subscribe"
+        android:background="#dacfcf"
+        android:onClick="subs" />
+     <Button
+        android:id="@+id/button2"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button11"
+        android:layout_alignBottom="@+id/button11"
+        android:layout_alignParentLeft="true"
+        android:onClick="backs"
+        android:background="#dacfcf"
+        android:text="Back" />
+
+   </RelativeLayout>
+   <RelativeLayout
+       android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+     
+       
+    <Spinner
+        android:id="@+id/fromDrop"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+         android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="132dp"
+        
+      />
+    
+      <Spinner
+        android:id="@+id/toDrop"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+         android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+      />
+       
+   </RelativeLayout>
+ </ViewFlipper>
+
+
+</RelativeLayout>
