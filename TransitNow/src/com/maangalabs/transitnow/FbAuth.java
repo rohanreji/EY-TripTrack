@@ -461,7 +461,7 @@ public class FbAuth extends Activity {
 	        		
 	        	 EditText e1=(EditText)findViewById(R.id.editText1);
 				 String sender1=e1.getText().toString();
-	            GMailSender sender = new GMailSender("rohanreji93@gmail.com", "squarednotcubed1!");
+	            GMailSender sender = new GMailSender("rohanreji93@gmail.com", "password");
 	            try {
 	            	Random rn = new Random();
 	            	int n = 888888 + 1;
