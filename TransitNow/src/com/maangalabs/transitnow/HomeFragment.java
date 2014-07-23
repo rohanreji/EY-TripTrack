@@ -92,7 +92,7 @@ private GestureDetector gestureScanner;
     	    		longi2=db.getLongi();
     	    		db.close();
     	         
-    	    		Routes route_data[] = new Routes[]
+    	    	/*	Routes route_data[] = new Routes[]
     	    		{
 	                          new Routes("Pattom","9:50 am"),new Routes("Ulloor","10:20 am"),new Routes("Pongummodu","10:35 am"),
 	                          new Routes("Sreekaryam","10:50 am"),new Routes("Chavadimmuku","11:00 am"),new Routes("AlSaj","11.30 pm"),
@@ -110,7 +110,7 @@ private GestureDetector gestureScanner;
     	    		ListView listView1 = (ListView)v.findViewById(R.id.listView1);
 	                      
 	                  //  adapter.notifyDataSetChanged();
-    	    		listView1.setAdapter(adapter);
+    	    		listView1.setAdapter(adapter);*/
     		  	}
     	
     		 	return v;

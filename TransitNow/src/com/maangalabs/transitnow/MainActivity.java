@@ -24,6 +24,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,13 +39,18 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -52,18 +58,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.MapFragment;
+import com.maangalabs.transitnow.FavFragment.LongOperation1;
 
 
 @SuppressLint("NewApi") 
@@ -71,32 +82,132 @@ public class MainActivity extends FragmentActivity
 {
 	public double lati[];
 	LatLng point1[];
+	Location loc;
+	LocationManager locationManager;
+	static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 1; // in Meters
+	static final long MINIMUM_TIME_BETWEEN_UPDATES = 500;
 	
 	public double longi[];
+	 String s1[],s2[];
 	public SharedPreferences preferences;
 	MapView mapView;
+	//LocationManager  locationManager;
+	//Location loc;
 	int p=0;
+	String names1="no stops!";
 	GoogleMap map;
-	CabAdapter adapter;
+	RoutesAdapter adapter;
 	private ViewPager viewPager;
     private TabsPagerAdapter mAdapter;
     ImageView my_image;
     String names;
+    ViewFlipper viewFlipper;
     public static final int progress_bar_type = 0; 
     private ProgressDialog pDialog;
     TextView t9;
     private GoogleMap googleMap;
+  //  static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 3; // in Meters
+	//static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000;
     @Override
     public void onBackPressed()
    {
     
     	android.os.Process.killProcess(android.os.Process.myPid());     	
    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+  
    
+   @Override
+   public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+       int itemId = item.getItemId();
+       switch (itemId) {
+       case R.id.action_cart:
+    	 //  Toast.makeText(getApplicationContext(), item.getTitle().toString(), Toast.LENGTH_SHORT).show();
+    	   if(item.getTitle().toString().equals("stops")){
+    	   if (viewFlipper.getDisplayedChild() == 1)
+              break;
+          
+           // set the required Animation type to ViewFlipper
+           // The Next screen will come in form Left and current Screen will go OUT from Right
+           viewFlipper.setInAnimation(this, R.anim.in_from_right);
+           viewFlipper.setOutAnimation(this, R.anim.out_to_left);
+           // Show the next Screen
+           viewFlipper.showNext(); 
+           item.setTitle("map");
+           new StopSetter().execute(" ");
+
+           // Toast.makeText(this, "home pressed", Toast.LENGTH_LONG).show();
+    	   }
+    	   else
+    	   {
+    		   if (viewFlipper.getDisplayedChild() == 0)
+    	              break;
+    	          
+    	           // set the required Animation type to ViewFlipper
+    	           // The Next screen will come in form Left and current Screen will go OUT from Right
+    	           viewFlipper.setInAnimation(this, R.anim.in_from_left);
+    	           viewFlipper.setOutAnimation(this, R.anim.out_to_right);
+    	           // Show the next Screen
+    	           viewFlipper.showNext(); 
+    	           item.setTitle("stops");
+    	   }
+           break;
+           
+
+       }
+
+       return true;
+   }
+   public void addMarker()
+   {
+	   float zoom=googleMap.getCameraPosition().zoom;
+	   CameraPosition cameraPosition = new CameraPosition.Builder().target(
+	 			new LatLng(loc.getLatitude(),loc.getLongitude())).zoom(zoom).build();
+	   googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+	/*   MarkerOptions options = new MarkerOptions();
+		
+		
+		options.position(new LatLng(loc.getLatitude(),loc.getLongitude()));
+	
+
+
+	googleMap.addMarker(options);*/
+	//addMarkers();
+   }
+   protected void showCurrentLocation() {
+   	Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+   	if (location != null) {
+   		loc=location;
+   		addMarker();
+	
+   	}
+   }  
+   private class MyLocationListener implements LocationListener {
+   	
+   	public void onLocationChanged(Location location) {
+           	
+   		   		showCurrentLocation();
+           	           
+           	          
+   	}
+   	public void onStatusChanged(String s, int i, Bundle b) {
+   	}
+   	public void onProviderDisabled(String s) {
+          }
+   	public void onProviderEnabled(String s) {
+     }
+   }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_main);
+    	
     	//ColorDrawable cd = new ColorDrawable(0xD7DF0100);
     	//getActionBar().setBackgroundDrawable(cd);
     	
@@ -109,11 +220,25 @@ public class MainActivity extends FragmentActivity
       
         viewPager.setAdapter(mAdapter);
         viewPager.setCurrentItem(0);
+        viewFlipper = (ViewFlipper) findViewById(R.id.view_flipper13);
+        
+        
    
         /*
          * Initialize the map, and set it point using camera update...
          */
       
+    //    locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+	  /*  locationManager.requestLocationUpdates(
+				                 LocationManager.GPS_PROVIDER,
+				 
+				                 MINIMUM_TIME_BETWEEN_UPDATES,
+				 
+				                 MINIMUM_DISTANCE_CHANGE_FOR_UPDATES,
+				 
+				                 new MyLocationListener()
+				 
+				         );*/
         try {
             	initilizeMap();
             	if(googleMap!=null)
@@ -131,9 +256,19 @@ public class MainActivity extends FragmentActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+       
         
-        
-        
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(
+     			                 LocationManager.GPS_PROVIDER,
+     			 
+     			                 MINIMUM_TIME_BETWEEN_UPDATES,
+     			 
+     			                 MINIMUM_DISTANCE_CHANGE_FOR_UPDATES,
+     			 
+     			                 new MyLocationListener()
+     			 
+     			         );
         
 
     	/*
@@ -161,21 +296,20 @@ public class MainActivity extends FragmentActivity
     			coders[0]=lati[0];
     			coders[1]=longi[0];
     		//new ReverseGeocodingTask().execute(coders);
-    		}
-    		MarkerOptions options = new MarkerOptions();
-    		for(int i=0;i<db.getContactsCount();i++)
-    		{
+    		}*/
+    	/*	MarkerOptions options = new MarkerOptions();
+    		
 	
     			options.position(new LatLng(lati[i],longi[i]));
-    		}
+    		
 
 
     		googleMap.addMarker(options);
-    		addMarkers();
-    		db.close(); */
+    		addMarkers();*/
+    	//	db.close(); 
     		
     		
-    		new GetDbVersion().execute("");
+    	//	new GetDbVersion().execute("");
     	}
     	else
     	{
@@ -285,32 +419,31 @@ public class MainActivity extends FragmentActivity
      * Add markers at all the stops in the route..
      */
     private void addMarkers() {
-    	 DataBaseHelper db = new DataBaseHelper(MainActivity.this);
+    /*	 DataBaseHelper db = new DataBaseHelper(MainActivity.this);
     	 double[]  lati2=new double[db.getContactsCount()];
          double[] longi2=new double[db.getContactsCount()];
          lati2=db.getLati();
-         longi2=db.getLongi();
+         longi2=db.getLongi();*/
     	
          if (googleMap != null) {
-        	 ReadTask downloadTask = new ReadTask();
-        	 String url = getMapsApiDirectionsUrl();
-        	 downloadTask.execute(url);
-        	 if(db.getContactsCount()!=0)
-        	 {
+        //	 ReadTask downloadTask = new ReadTask();
+        //	 String url = getMapsApiDirectionsUrl();
+        	// downloadTask.execute(url);
+        	 //if(db.getContactsCount()!=0)
+        	 //{
         		 CameraPosition cameraPosition = new CameraPosition.Builder().target(
-        	 			new LatLng(lati2[0],longi2[0])).zoom(12).build();
+        	 			new LatLng(loc.getLatitude(),loc.getLongitude())).zoom(12).build();
            
         		 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        	 }
-        	 for(int i=0;i<db.getContactsCount();i++)
-        	 {
-        		 googleMap.addMarker(new MarkerOptions().position(new LatLng(lati[i],longi[i]))
-            			.title("Point"+i));
-        	 }
+        	// }
+        	
+        		 googleMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(),loc.getLongitude()))
+            			.title("You"));
+        	 
          
          
     }
-    db.close();
+    //db.close();
  }
 	
   /*
@@ -393,7 +526,7 @@ private class LongOperation extends AsyncTask<String, Void, String> {
            		 * making the second viewflipper 
            		 */
         		
-       		 	
+       /*		 	
        		 	Routes weather_data[] = new Routes[]
 	                      {
 	                          new Routes("Pattom","1:30 pm"),
@@ -410,7 +543,7 @@ private class LongOperation extends AsyncTask<String, Void, String> {
        		 	ListView listView1 = (ListView)findViewById(R.id.listView1);
 	                      
 	                  //  adapter.notifyDataSetChanged();
-       		 	listView1.setAdapter(adapter);
+       		 	listView1.setAdapter(adapter);*/
        		 	
        		 	new GetDbVersion().execute("");
        		 	
@@ -460,7 +593,7 @@ private class LongOperation extends AsyncTask<String, Void, String> {
         		
         	   		
         	   	new GetDbVersion().execute("");
-        	   	Routes weather_data[] = new Routes[]
+        /*	   	Routes weather_data[] = new Routes[]
  	            {
         	   			new Routes("Pattom","1:30 pm"),
  	            };
@@ -476,7 +609,7 @@ private class LongOperation extends AsyncTask<String, Void, String> {
  	                      
  	                  //  adapter.notifyDataSetChanged();
      	        listView1.setAdapter(adapter);
-        	   	
+        	   	*/
           		 /*
           	    	 * on Login Display the route with the databse , move this code to LongOperation's postexecute.
           	    	 */
@@ -636,13 +769,96 @@ private class LongOperation extends AsyncTask<String, Void, String> {
 		  
 		  
 		  
+		  /*
+		   * on click of goback text
+		   */
+		  
+	/*	  public void goBack(View v)
+		    {
+			  if (FavFragment.viewFlipper.getDisplayedChild() == 1)
+	                return;
+	            // set the required Animation type to ViewFlipper
+	            // The Next screen will come in form Right and current Screen will go OUT from Left
+	            FavFragment.viewFlipper.setInAnimation(MainActivity.this, R.anim.in_from_right);
+	            FavFragment.viewFlipper.setOutAnimation(MainActivity.this, R.anim.out_to_left);
+	            // Show The Previous Screen
+	           FavFragment.viewFlipper.showPrevious();
+		    }*/
 		  
 		  
 		  /*
+		   * on click of button show near..
+		   */
+		
+		  
+		  
+	/*	  
+		  public void shownear(View v)
+		    {
+			 
+			  /*
+			   * enabling location..
+			   */
+		/*	 locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+			    if( !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+			        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			        builder.setTitle("No GPS");  // GPS not found
+			        builder.setMessage("Location Not Enabled"); // Want to enable?
+			        builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+			            public void onClick(DialogInterface dialogInterface, int i) {
+			                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+			            }
+			        });
+			        builder.setNegativeButton("no", null);
+			        builder.create().show();
+			        return;
+			    } 
+			    
+			   
+			  
+		    	ListView l=(ListView)findViewById(R.id.listView2);
+		    	l.setVisibility(View.VISIBLE);
+		    	if(loc!=null)
+		    	{
+		    		if(haveNetworkConnection())
+		        		 new LongOperation1().execute(" ");
+		    		else
+		    			Toast.makeText(getApplicationContext(), "Not connected to network!",Toast.LENGTH_SHORT).show();
+		    	}
+		    	else
+		    	{
+		    		Toast.makeText(getApplicationContext(), "fetching location please wait",Toast.LENGTH_SHORT).show();
+		    	}
+		    	
+		    }
+		  
+		  protected void showCurrentLocation() {
+	        	Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	        	if (location != null) {
+	        		loc=location;
+	        		
+			
+	        	}
+	        }  
+		  private class MyLocationListener implements LocationListener {
+          	
+	        	public void onLocationChanged(Location location) {
+	                	
+	        		   		showCurrentLocation();
+	                	           
+	                	          
+	        	}
+	        	public void onStatusChanged(String s, int i, Bundle b) {
+	        	}
+	        	public void onProviderDisabled(String s) {
+	               }
+	        	public void onProviderEnabled(String s) {
+	          }
+	        }
+		  */
+		  /*
 		   * Download the database.
 		   */
-		  
-		  
 		  private class DownloadDb extends AsyncTask<String, String, String> {
 			  ProgressDialog dialog = new ProgressDialog(MainActivity.this);
 			  
@@ -840,4 +1056,259 @@ private class LongOperation extends AsyncTask<String, Void, String> {
 		  }			
 		  
 		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  /*
+		   * 
+		   * TO get the list of nearby stops..
+		   */
+		  
+		  
+		/*  
+		  
+
+			public class LongOperation1 extends AsyncTask<String, Void, String> {
+
+		        @Override
+		        protected String doInBackground(String... params) {
+		        	try{
+		        	if(loc!=null){
+		        		 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		       		  int flag = preferences.getInt("f", 0);
+		        	   		             		
+		            	
+		                	
+		            	  
+		            	        
+		            	        
+		       		 JSONArray jsonA;
+		       		
+						try {
+							jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.129:1010/nearest_stops?lat="+loc.getLatitude()+"&lon="+loc.getLongitude()+"&limit=10");
+							System.out.println("http://192.168.0.129:1010/nearest_stops?lat="+loc.getLatitude()+"&lon="+loc.getLongitude()+"&limit=10");
+							s1=new String[jsonA.length()];
+							s2=new String[jsonA.length()];
+							for(int i=0;i<jsonA.length();i++){
+								
+								 try {
+			            		    	
+			            		    	JSONObject e2 = jsonA.getJSONObject(i);
+			            		    	s1[i]=e2.getString("stop_name");
+			            		    	s2[i]=e2.getString("stop_id");
+								 }
+								 catch(Exception e)
+								 {
+									 System.out.print("sorry");
+								 }
+							}
+		
+						}
+						catch(Exception e)
+						{
+							 System.out.print("sorry1");
+						}
+		            	    
+		              //  deviceName.remove(i);
+		            	//deviceName.add(i,"Dell Inspiron");
+		                	
+		        	     
+		                
+		            	
+		        	}
+		            	
+		            	
+		        	
+		        	}
+		        	catch(Exception e)
+		        	{
+		        		
+		        	}
+		        	       	
+		            return "Executed";
+		        }
+		       
+		        
+		        @Override
+		        protected void onPostExecute(String result) {
+		            // txt.setText(result);
+		            // might want to change "executed" for the returned string passed
+		            // into onPostExecute() but that is upto you
+		        	
+		        		
+		       		          	
+		    		 
+		    		 /*
+		    		  * set the cab details here 
+		    		  * using some for loop
+		    		  */
+		       /* 	
+ 	  	    		Toast.makeText(getApplicationContext(), "finished",Toast.LENGTH_SHORT).show();
+ 	  	    		
+		        	  Cabs weather_data[] = new Cabs[s1.length];
+		        	  for(int i=0;i<s1.length;i++)
+	        	 		{
+	        	 			weather_data[i]=new Cabs(s1[i]);
+	        	 		}
+		                     
+		         adapter = new CabAdapter(MainActivity.this,
+		                              R.layout.listview_item_row, weather_data);
+		                     
+		                    // adapter.notifyDataSetChanged();
+		              
+		                     
+		         ListView listView1 = (ListView)findViewById(R.id.listView2);
+		                      
+		                  //  adapter.notifyDataSetChanged();
+		         listView1.setOnItemClickListener(new OnItemClickListener() {
+		             @Override
+		             public void onItemClick(AdapterView<?> parent, View view, int position,
+		                     long id) {
+		            	 if (FavFragment.viewFlipper.getDisplayedChild() == 1)
+		    	                return;
+		    	            // set the required Animation type to ViewFlipper
+		    	            // The Next screen will come in form Right and current Screen will go OUT from Left
+		    	            FavFragment.viewFlipper.setInAnimation(MainActivity.this, R.anim.in_from_right);
+		    	            FavFragment.viewFlipper.setOutAnimation(MainActivity.this, R.anim.out_to_left);
+		    	            // Show The Previous Screen
+		    	           FavFragment.viewFlipper.showNext();
+		             }
+		         });
+		     		this.cancel(true);
+ 	  	    		
+		        }
+
+		        @Override
+		        protected void onPreExecute() {
+		        	 Cabs weather_data[] = new Cabs[]
+		                      {
+		                          new Cabs("Loading.."),
+		                          
+		                      };
+		                     
+		         adapter = new CabAdapter(MainActivity.this,
+		                              R.layout.listview_item_row, weather_data);
+		                     
+		                    // adapter.notifyDataSetChanged();
+		              
+		                     
+		         ListView listView1 = (ListView)findViewById(R.id.listView2);
+		                      
+		                  //  adapter.notifyDataSetChanged();
+		         listView1.setAdapter(adapter);
+		         
+		        
+		        	
+		        }
+
+		        @Override
+		        protected void onProgressUpdate(Void... values) {
+		        	
+		        }
+		    }
+		    */
+		  
+		  
+		  
+		  /*
+		   * 
+		   * sets the list of stops..
+		   */
+		    
+		  
+		  public class StopSetter extends AsyncTask<String, Void, String> {
+
+		        @Override
+		        protected String doInBackground(String... params) {
+		        	try{
+		        	
+		        	
+		        	}
+		        	catch(Exception e)
+		        	{
+		        		
+		        	}
+		        	       	
+		            return "Executed";
+		        }
+		       
+		        
+		        @Override
+		        protected void onPostExecute(String result) {
+		            // txt.setText(result);
+		            // might want to change "executed" for the returned string passed
+		            // into onPostExecute() but that is upto you
+		        	
+		        		
+		       		          	
+		    		 
+		    		 /*
+		    		  * set the cab details here 
+		    		  * using some for loop
+		    		  */
+		   	
+	  	    		Toast.makeText(getApplicationContext(), "finished",Toast.LENGTH_SHORT).show();
+	  	    		
+		        	  Routes weather_data[] = new Routes[]{
+		        			  new Routes("Palayam","12.00"), new Routes("Chavadimukku","1.00"), new Routes("Kinfra","2.00")
+		        	  };
+		        	
+		                     
+		         adapter = new RoutesAdapter(MainActivity.this,
+		                              R.layout.list_item_row_home, weather_data);
+		                     
+		                    // adapter.notifyDataSetChanged();
+		              
+		                     
+		         ListView listView1 = (ListView)findViewById(R.id.listView12);
+		                      
+		                  //  adapter.notifyDataSetChanged();
+		         listView1.setAdapter(adapter);
+		     		this.cancel(true);
+	  	    		
+		        }
+
+		        @Override
+		        protected void onPreExecute() {
+		        	Routes weather_data[] = new Routes[]
+		                      {
+		                          new Routes("Loading..",""),
+		                          
+		                      };
+		                     
+		         adapter = new RoutesAdapter(MainActivity.this,
+		                              R.layout.list_item_row_home, weather_data);
+		                     
+		                    // adapter.notifyDataSetChanged();
+		              
+		                     
+		         ListView listView1 = (ListView)findViewById(R.id.listView12);
+		                      
+		                  //  adapter.notifyDataSetChanged();
+		         listView1.setAdapter(adapter);
+		         
+		        
+		        	
+		        }
+
+		        @Override
+		        protected void onProgressUpdate(Void... values) {
+		        	
+		        }
+		    }
  }

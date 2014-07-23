@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
  /*
   * Fragment class for Favourite layout
   */
@@ -40,6 +42,8 @@ import android.widget.Toast;
 	String names="no cabs!";
 	View rootView;
 	CabAdapter adapter;
+	static ViewFlipper viewFlipper;
+	 ListView l;
 	 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
      
      Paint paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -49,12 +53,16 @@ import android.widget.Toast;
             Bundle savedInstanceState) {
  
       rootView = inflater.inflate(R.layout.fav_layout, container, false);
-      
+      viewFlipper = (ViewFlipper) rootView.findViewById(R.id.view_flipper1);
+      TextView t=(TextView)rootView.findViewById(R.id.help1);
+		
+		Typeface tf=Typeface.createFromAsset(getActivity().getAssets(),"font/font1.ttf");
+		t.setTypeface(tf);
         Log.d("tag1", "invalidate");
        // container.removeAllViews();
       
      
-		 
+    //   l=(ListView)rootView.findViewById(R.id.listView1);
         return rootView;
     }
     
@@ -63,11 +71,11 @@ import android.widget.Toast;
 		// TODO Auto-generated method stub
 		
 		
-		  new LongOperation1().execute(" ");
+		 
 		
 	}
     
-    
+  
 	
 	
 	
@@ -177,7 +185,7 @@ import android.widget.Toast;
 	                    // adapter.notifyDataSetChanged();
 	              
 	                     
-	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView1);
+	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView2);
 	                      
 	                  //  adapter.notifyDataSetChanged();
 	         listView1.setAdapter(adapter);
@@ -199,7 +207,7 @@ import android.widget.Toast;
 	                    // adapter.notifyDataSetChanged();
 	              
 	                     
-	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView1);
+	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView2);
 	                      
 	                  //  adapter.notifyDataSetChanged();
 	         listView1.setAdapter(adapter);

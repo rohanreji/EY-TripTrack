@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -43,6 +45,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,9 +58,14 @@ public class FbAuth extends Activity {
 	JSONObject jsonobject;
     JSONArray jsonarray;
     ProgressDialog mProgressDialog;
+    String stop1,stop1name,stops1[];
+    String stop2,stop2name,stops2[];
+    Date date1[],date2[];
+    String dates1[],dates2[];
     ArrayList<String> worldlist;
     int pos;
     String s1[];
+    String s2[];
 	public static int ba=1;
 	int code;
 	@Override
@@ -74,7 +82,10 @@ public class FbAuth extends Activity {
 	     		finish(); 
 	     		
 	     	}	
+	     	
 	    	setContentView(R.layout.fb_auth);
+	    	
+	    	
 	    	  viewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
 	    	 TextView welcome = (TextView) findViewById(R.id.welcome);
 	    	 Typeface tf=Typeface.createFromAsset(getAssets(),"font/font1.ttf");
@@ -158,6 +169,50 @@ public class FbAuth extends Activity {
         // Show the next Screen
         viewFlipper.showPrevious();
 	}
+	
+	/*public void backs1(View v)
+	{
+		if (viewFlipper.getDisplayedChild() == 1)
+            return;
+       
+        // set the required Animation type to ViewFlipper
+        // The Next screen will come in form Left and current Screen will go OUT from Right
+        viewFlipper.setInAnimation(this, R.anim.in_from_left);
+        viewFlipper.setOutAnimation(this, R.anim.out_to_right);
+        // Show the next Screen
+        viewFlipper.showPrevious();
+	}*/
+	/*public void subs1(View v)
+	{
+		 if (viewFlipper.getDisplayedChild() == 3)
+             return;
+         // set the required Animation type to ViewFlipper
+         // The Next screen will come in form Right and current Screen will go OUT from Left
+         viewFlipper.setInAnimation(FbAuth.this, R.anim.in_from_right);
+         viewFlipper.setOutAnimation(FbAuth.this, R.anim.out_to_left);
+         // Show The Previous Screen
+         viewFlipper.showNext();
+         new SendM2().execute(" ");
+         
+      /*   Routes route_data[] = new Routes[]
+	  	    		{
+	 	                          new Routes("Pattom","9:50 am"),new Routes("Ulloor","10:20 am"),new Routes("Pongummodu","10:35 am"),
+	 	                          new Routes("Sreekaryam","10:50 am"),new Routes("Chavadimmuku","11:00 am"),new Routes("AlSaj","11.30 pm"),
+	 	                          
+	 	                };
+	  	    		StopAdapter adapter;
+	 	                     
+	  	    		adapter = new StopAdapter(this,
+	 	                              R.layout.list_item_row_stops, route_data);
+	  	         
+	 	                     
+	 	                    // adapter.notifyDataSetChanged();
+	 	              
+	 	                     
+	  	    		ListView listView1 = (ListView)findViewById(R.id.listView2);
+	  	    		listView1.setAdapter(adapter);*/
+        
+	//}
 	public void subs(View v)
 	{
 		EditText e2=(EditText)findViewById(R.id.editText11);
@@ -166,7 +221,21 @@ public class FbAuth extends Activity {
 		try{
 		if(Integer.parseInt(e2.getText().toString())==code)
 		{
-			Toast.makeText(getApplicationContext(), "got it", Toast.LENGTH_SHORT).show();
+			/*Toast.makeText(getApplicationContext(), "got it", Toast.LENGTH_SHORT).show();
+			
+			
+			 if (viewFlipper.getDisplayedChild() == 2)
+	                return;
+	            // set the required Animation type to ViewFlipper
+	            // The Next screen will come in form Right and current Screen will go OUT from Left
+	            viewFlipper.setInAnimation(FbAuth.this, R.anim.in_from_right);
+	            viewFlipper.setOutAnimation(FbAuth.this, R.anim.out_to_left);
+	            // Show The Previous Screen
+	            viewFlipper.showNext();
+	            new DownloadJSON().execute();
+			
+			*/
+		
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(FbAuth.this);
     		SharedPreferences.Editor editor = preferences.edit();
     		editor.putInt("f",Integer.parseInt(e2.getText().toString()));
@@ -180,7 +249,19 @@ public class FbAuth extends Activity {
 		else
 			
 		{
-			  if (viewFlipper.getDisplayedChild() == 2)
+			
+			
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(FbAuth.this);
+    		SharedPreferences.Editor editor = preferences.edit();
+    		editor.putInt("f",Integer.parseInt(e2.getText().toString()));
+    		
+    		editor.commit();
+    		Intent i=new Intent(this,MainActivity.class);
+    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    		startActivity(i);
+    		finish(); 
+			
+	/*		 if (viewFlipper.getDisplayedChild() == 2)
 	                return;
 	            // set the required Animation type to ViewFlipper
 	            // The Next screen will come in form Right and current Screen will go OUT from Left
@@ -188,7 +269,7 @@ public class FbAuth extends Activity {
 	            viewFlipper.setOutAnimation(FbAuth.this, R.anim.out_to_left);
 	            // Show The Previous Screen
 	            viewFlipper.showNext();
-	            new DownloadJSON().execute();
+	          //  new DownloadJSON().execute(); */
 		}
 		}
 		catch(Exception e){
@@ -242,8 +323,7 @@ public class FbAuth extends Activity {
                                }
                                break;
                            }
-                   }
-                   return false;
+                   }                   return false;
       }
 	*/
 	 @Override
@@ -257,6 +337,120 @@ public class FbAuth extends Activity {
 	     
 	    }
 	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 /*
+	 
+	 
+	 private class SendM2 extends AsyncTask<String, String, String>{
+		 
+	        @Override
+	        protected String doInBackground(String... params) {
+	        	
+	        	 JSONArray jsonA;
+					try {
+						jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.129:1010/get_timings?s1_id="+stop1+"&s2_id="+stop2);
+						s1=new String[jsonA.length()];
+						date1=new Date[jsonA.length()];
+						date2=new Date[jsonA.length()];
+						stops1=new String[jsonA.length()];
+						stops2=new String[jsonA.length()];
+						dates1=new String[jsonA.length()];
+						dates2=new String[jsonA.length()];
+						System.out.println("url: "+stop1+" : "+jsonA.length() );
+		            	for(int i=0;i<jsonA.length();i++){
+		            		
+		            		
+		            		 SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+		            		 stops1[i]=stop1name;
+	            		        stops2[i]=stop2name;
+	            		        System.out.println("r");
+		            		    try {
+		            		    	
+		            		    	JSONObject e2 = jsonA.getJSONObject(i);
+		    	            		
+		            		        date1[i] = sdf.parse(e2.getString("s1.arrival_time"));
+		            		        dates1[i] = sdf.format(date1[i]);
+		            		     
+		            		        date2[i] = sdf.parse(e2.getString("s2.arrival_time"));
+		            		        dates2[i]=sdf.format(date2[i]);
+		            		        if(date1[i].compareTo(date2[i])>0)
+		            		        {
+		            		        	Date temp=date1[i];
+		            		        	date1[i]=date2[i];
+		            		        	date2[i]=temp;
+		            		        	String tempd=dates1[i];
+		            		        	dates1[i]=dates2[i];
+		            		        	dates2[i]=tempd;
+		            		        	String temps=stops1[i];
+		            		        	stops1[i]=stops2[i];
+		            		        	stops2[i]=temps;
+		            		        }
+		            		    } catch (Exception e1) {
+		            		        e1.printStackTrace();
+		            		    }
+		                   
+		            	}
+					}
+		            	catch(Exception e)
+		            	{
+		            		
+		            	}
+	        	
+	        return " ";
+	        }
+	        @Override
+	        protected void onPostExecute(String result) {
+	        	
+	        	Toast.makeText(getApplicationContext(), stop1+" "+stop2, Toast.LENGTH_SHORT).show();
+	        	 Routes route_data[]=new Routes[stops1.length];
+	        	 		for(int i=0;i<stops1.length;i++)
+	        	 		{
+	        	 			route_data[i]=new Routes(stops1[i]+" - "+stops2[i],dates1[i]+" - "+dates2[i]);
+	        	 		}
+	 	  	    		StopAdapter adapter;
+	 	 	                     
+	 	  	    		adapter = new StopAdapter(FbAuth.this,
+	 	 	                              R.layout.list_item_row_stops, route_data);
+	 	  	         
+	 	 	                     
+	 	 	                    // adapter.notifyDataSetChanged();
+	 	 	              
+	 	 	                     
+	 	  	    		ListView listView1 = (ListView)findViewById(R.id.listView2);
+	 	  	    		listView1.setAdapter(adapter);
+	    		
+	        }
+
+	        @Override
+	        protected void onPreExecute() {
+	       
+	        }
+
+	        protected void onProgressUpdate(String... progress) {
+	   		
+	   	}
+		 
+		 
+	 }
+	 
+	 */
 	 
 	  private class SendM extends AsyncTask<String, String, String> {
 		  
@@ -348,7 +542,7 @@ public class FbAuth extends Activity {
 	  
 	  
 	  
-	  
+	  /*
 	  
 	  private class DownloadJSON extends AsyncTask<Void, Void, Void> {
 		  
@@ -362,7 +556,7 @@ public class FbAuth extends Activity {
 	            // JSON file URL address
 	            JSONArray jsonA;
 				try {
-					jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.105:1111/all_stops");
+					jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.129:1010/all_stops");
 					s1=new String[jsonA.length()];
 	            	for(int i=0;i<jsonA.length();i++){
 	            		
@@ -411,6 +605,8 @@ public class FbAuth extends Activity {
 	                            // Locate the textviews in activity_main.xml
 	                        	
 	                        	pos=position;
+	                        	stop1=s1[pos];
+	                        	stop1name=worldlist.get(pos);
 	                        	new DownloadJSON1().execute();
 	                        	
 	                            
@@ -432,12 +628,12 @@ public class FbAuth extends Activity {
 	  
 	  
 	  
+	  */
 	  
 	  
 	  
 	  
-	  
-	  
+	  /*
 	  
 	  
 	  
@@ -445,6 +641,7 @@ public class FbAuth extends Activity {
 	  
 	  private class DownloadJSON1 extends AsyncTask<Void, Void, Void> {
 		  ArrayList<String> worldlist1;
+		  
 	        @Override
 	        protected Void doInBackground(Void... params) {
 	            // Locate the WorldPopulation Class   
@@ -456,13 +653,16 @@ public class FbAuth extends Activity {
 	            JSONArray jsonA;
 				try {
 					System.out.println(s1[pos]);
-					jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.105:1111/stops_from?stop_id="+s1[pos]);
+					jsonA = JSONfunctions.getJSONfromURL("http://192.168.0.129:1010/stops_from?stop_id="+s1[pos]);
 					System.out.println(s1[pos]);
-					
+					s2=new String[jsonA.length()];
 	            	for(int i=0;i<jsonA.length();i++){
 	            		
 	            		JSONObject e = jsonA.getJSONObject(i);
 	            		
+		            	s2[i]=e.getString("stop_id");
+		                    // Populate spinner with country names
+		                		            	
 	                    // Populate spinner with country names
 	                    worldlist1.add((e.getString("stop")));
 	            	}
@@ -505,6 +705,8 @@ public class FbAuth extends Activity {
 	                            // TODO Auto-generated method stub
 	                            // Locate the textviews in activity_main.xml
 	                        	//new DownloadJSON1().execute();
+	                        	stop2=s2[position];
+	                        	stop2name=worldlist1.get(position);
 	                            
 	                        }
 	 
@@ -515,4 +717,5 @@ public class FbAuth extends Activity {
 	                    });
 	        }
 	    }
+	    */
 }
