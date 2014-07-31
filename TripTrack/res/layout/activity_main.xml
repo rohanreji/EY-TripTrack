@@ -1,16 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#8e44ad" >
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:text="TextView" 
-       />
+     >
+    <RelativeLayout
+	android:layout_width="fill_parent"
+    android:layout_height="250dp"
+    android:id="@+id/rl1"
+   >
 
     <EditText
         android:id="@+id/editTextSimple"
@@ -23,7 +19,7 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
          android:hint="DriverName"
-         android:textColor="#fff">
+        >
 
         <requestFocus />
     </EditText>
@@ -37,21 +33,48 @@
         android:layout_below="@+id/editTextSimple"
         android:layout_marginTop="26dp"
         android:ems="10"
-        android:textColor="#fff"
+       
           android:hint="Vehicle Number"/>
+    
+    </RelativeLayout>
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/editText1"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="80dp"
+        android:layout_below="@+id/rl1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="78dp"
+        android:background="#e74c3c"
         android:onClick="ev1"
+        android:textColor="#fff"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
-        android:background="#9b59b6"
         android:text="start trip" />
+     <Button
+        android:id="@+id/button2"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="78dp"
+        android:background="#e74c3c"
+        android:onClick="ev2"
+        android:textColor="#fff"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:text="stop trip" 
+        android:visibility="invisible"/>"
+    
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text=" "
+        android:textColor="#e74c3c"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

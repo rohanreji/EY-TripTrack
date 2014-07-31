@@ -12,10 +12,10 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.support.v7.app.ActionBarActivity;
-
 
 import com.qualcommlabs.usercontext.Callback;
 import com.qualcommlabs.usercontext.ContextCoreConnector;
@@ -24,10 +24,17 @@ import com.qualcommlabs.usercontext.ContextPlaceConnector;
 import com.qualcommlabs.usercontext.ContextPlaceConnectorFactory;
 import com.qualcommlabs.usercontext.PlaceEventListener;
 import com.qualcommlabs.usercontext.protocol.PlaceEvent;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
+import android.telephony.TelephonyManager;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.nfc.NfcAdapter;
@@ -39,6 +46,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,16 +59,30 @@ import android.preference.PreferenceManager;
       
 	  private ContextPlaceConnector contextPlaceConnector;
 	  private TextView mTextView;
+	  private String QUEUE_NAME = "queue1";
+		private String EXCHANGE_NAME = "realtime";
 	 int p;
 	 String name;
 	 String dname;
+	 Button b1,b2;
     private NfcAdapter mNfcAdapter;
+ 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
        new LongOperation().execute(" ");
+       
+       
+       
         setContentView(R.layout.activity_main);
+        b1=(Button)findViewById(R.id.button1);
+        b2=(Button)findViewById(R.id.button2);
+        if(isMyServiceRunning())
+        {
+        	b1.setVisibility(View.INVISIBLE);
+        	b2.setVisibility(View.VISIBLE);
+        }
         mTextView = (TextView) findViewById(R.id.textView1);
         if (mNfcAdapter == null) {
             // Stop here, we definitely need NFC
@@ -82,6 +104,18 @@ import android.preference.PreferenceManager;
        
         
     }
+    
+    
+    private boolean isMyServiceRunning() {
+ 		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+ 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+ 			if (MyService.class.getName().equals(service.service.getClassName())) {
+ 				return true;
+ 			}	
+ 		}
+ 		return false;
+ 	}
+    
     public void ev1(View v)
     {
     	//	new send().execute(message);
@@ -90,23 +124,32 @@ import android.preference.PreferenceManager;
     	{
     	Intent i= new Intent(getApplicationContext(), MyService.class);
     	i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);	
+    	
     	// potentially add data to the intent
     	i.putExtra("KEY1", "Value to be used by the service");
     	this.startService(i); 
+    	b1.setVisibility(View.INVISIBLE);
+    	b2.setVisibility(View.VISIBLE);
     	}
     	else
     		Toast.makeText(getApplicationContext(), "Wait,  fetching details from server",Toast.LENGTH_SHORT).show();
     	    }
+    public void ev2(View v)
+    {
+    	stopService(new Intent(MainActivity.this, MyService.class));
+    	b1.setVisibility(View.VISIBLE);
+    	b2.setVisibility(View.INVISIBLE);		
+    }
     private void checkContextConnectorStatus() {
         if (contextCoreConnector.isPermissionEnabled()) {
-         
+        	startListeningForGeofences();
         }
         else {
             contextCoreConnector.enable(this, new Callback<Void>() {
 
                 @Override
                 public void success(Void arg0) {
-                  
+                	startListeningForGeofences();
                 }
 
                 @Override
@@ -117,7 +160,81 @@ import android.preference.PreferenceManager;
         }
     }
     
-       
+//    private PlaceEventListener placeEventListener = new PlaceEventListener() {
+//
+//        @Override
+//        	public void placeEvent(PlaceEvent event) {
+//        	
+//        	 	
+//        		String placeNameAndId = "id: " + event.getPlace().getId() + " name: " + event.getPlace().getPlaceName();
+//        		Toast toast = Toast.makeText(getApplicationContext(), placeNameAndId, Toast.LENGTH_LONG);
+//        		toast.show();
+//        		//vibrate();
+//        		
+//        		Log.i("found place", placeNameAndId);
+        		
+//        		JSONObject json = new JSONObject(); 
+//    			try {
+//    				json.put("id:",  event.getPlace().getId());
+//
+//    				json.put("place:", event.getPlace().getPlaceName()); 
+//    				long timestamp = System.currentTimeMillis();
+//    				json.put("time_stamp:", timestamp);
+//
+//    			
+//    				
+//    				
+//    				TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE); 
+//    				
+//    				json.put("trip_id:",telephonyManager.getDeviceId());
+//
+//    				new send1().execute(json);
+//
+//    			} catch (JSONException e) {
+//    // TODO Auto-generated catch block
+//    				e.printStackTrace();
+//    			}
+//        		
+        		/*if(i.equals(NfcAdapter.ACTION_NDEF_DISCOVERED))	
+    			{
+    				myTag = (Tag) i.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+    			}
+    			else
+    				Taglist1=Taglist1+i.getAction().toString();
+    			if(myTag!=null)
+    				Taglist1=Taglist1+myTag.toString()+",";
+    			else
+    				Taglist1=Taglist1+"r";*/
+        		
+//        		JSONObject json = new JSONObject(); 
+//    			try {
+//    				json.put("id:",  event.getPlace().getId());
+//
+//    				json.put("place:", event.getPlace().getPlaceName()); 
+//    				long timestamp = System.currentTimeMillis();
+//    				json.put("time_stamp:", timestamp);
+//
+//    				json.put("tagid:",Taglist1);
+//    				
+//    				
+//    				TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE); 
+//    				
+//    				json.put("trip_id:",telephonyManager.getDeviceId());
+//
+//    				new send1().execute(json);
+//
+//    			} catch (JSONException e) {
+//    // TODO Auto-generated catch block
+//    				e.printStackTrace();
+//    			}
+//        	}
+//    	};
+    private void startListeningForGeofences() {
+    	Toast.makeText(getApplicationContext(), "gimbal permission enabled",Toast.LENGTH_SHORT).show();
+     //   contextPlaceConnector.addPlaceEventListener(placeEventListener);
+        
+    }
+
 
 
     @Override
@@ -238,6 +355,53 @@ private class LongOperation extends AsyncTask<String, Void, String> {
         protected void onProgressUpdate(Void... values) {}
     }
 	    
-    
+private class send1 extends AsyncTask<JSONObject, Void, Void> {
+
+	@Override
+	protected Void doInBackground(JSONObject... Message) {
+		try {
+			//Toast.makeText(getApplicationContext(), "click",Toast.LENGTH_SHORT).show();
+			
+			ConnectionFactory factory = new ConnectionFactory();
+			factory.setHost("54.80.250.130");
+			// my internet connection is a bit restrictive so I have use an
+			// external server
+			// which has RabbitMQ installed on it. So I use "setUsername"
+			// and "setPassword"
+			factory.setUsername("guest");
+			factory.setPassword("guest");
+			//factory.setVirtualHost("/");
+			factory.setPort(5672);
+			System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
+			Connection connection = factory.newConnection();
+			Channel channel1 = connection.createChannel();
+			
+			channel1.exchangeDeclare(EXCHANGE_NAME, "direct");
+			//channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+			String tempstr="";
+			for(int i=0;i<Message.length;i++)
+				tempstr+=Message[i];
+			
+
+			channel1.basicPublish(EXCHANGE_NAME, "key1", null,
+					tempstr.getBytes());
+			System.out.println("\nsend message:"+tempstr);
+			channel1.close();
+
+			connection.close();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+}
+
+
 
 }
