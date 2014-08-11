@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -37,6 +38,7 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -61,7 +63,10 @@ import android.preference.PreferenceManager;
 	  private TextView mTextView;
 	  private String QUEUE_NAME = "queue1";
 		private String EXCHANGE_NAME = "realtime";
+		
 	 int p;
+	   static TextView t;
+	   static TextView t1;
 	 String name;
 	 String dname;
 	 Button b1,b2;
@@ -73,17 +78,30 @@ import android.preference.PreferenceManager;
 
        new LongOperation().execute(" ");
        
-       
-       
+      
         setContentView(R.layout.activity_main);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//    	Editor editor = prefs.edit();
+//    	editor.putBoolean("sender", false);
+//    	editor.commit();
+        t=(TextView)findViewById(R.id.textView2);
+        t1=(TextView)findViewById(R.id.textView3);
         b1=(Button)findViewById(R.id.button1);
         b2=(Button)findViewById(R.id.button2);
-        if(isMyServiceRunning())
-        {
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+	       if (prefs.getBoolean("sender", false)) {
+       
         	b1.setVisibility(View.INVISIBLE);
         	b2.setVisibility(View.VISIBLE);
-        }
+	       
+	       }
+	       else
+	       {
+	    	   b2.setVisibility(View.INVISIBLE);
+	        	b1.setVisibility(View.VISIBLE);
+	       }
         mTextView = (TextView) findViewById(R.id.textView1);
+		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
             // Stop here, we definitely need NFC
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
@@ -127,6 +145,10 @@ import android.preference.PreferenceManager;
     	
     	// potentially add data to the intent
     	i.putExtra("KEY1", "Value to be used by the service");
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    	Editor editor = prefs.edit();
+    	editor.putBoolean("sender",true);
+    	editor.commit();
     	this.startService(i); 
     	b1.setVisibility(View.INVISIBLE);
     	b2.setVisibility(View.VISIBLE);
@@ -136,6 +158,24 @@ import android.preference.PreferenceManager;
     	    }
     public void ev2(View v)
     {
+    	
+    	SharedPreferences preferences = getSharedPreferences("preferencename", 0);
+    	preferences.edit().clear().commit();
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    	Editor editor = prefs.edit();
+    	editor.putBoolean("sender", false);
+    	editor.commit();
+    	int pid=0;
+    	ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+    	List<ActivityManager.RunningAppProcessInfo> pids = am.getRunningAppProcesses();
+    	   for(int i = 0; i < pids.size(); i++)
+    	   {
+    	       ActivityManager.RunningAppProcessInfo info = pids.get(i);
+    	       if(info.processName.equalsIgnoreCase("com.maangalabs.triptrack")){
+    	          pid = info.pid;
+    	       } 
+    	   }
+    	android.os.Process.killProcess(pid);
     	stopService(new Intent(MainActivity.this, MyService.class));
     	b1.setVisibility(View.VISIBLE);
     	b2.setVisibility(View.INVISIBLE);		

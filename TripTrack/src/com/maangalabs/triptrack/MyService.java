@@ -3,6 +3,7 @@ package com.maangalabs.triptrack;
 
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,22 +20,29 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.ListView;
@@ -46,22 +54,22 @@ import android.widget.Toast;
 	public double longitude;
 	private String QUEUE_NAME = "queue1";
 	private String EXCHANGE_NAME = "realtime";
+	ConnectionFactory factory;
+	Connection connection;
+	Channel channel,channel1;
 	Tag myTag;
+	String array1[]=new String[90000];
 	int t1;
 	String Taglist,Taglist1;
-	private NfcAdapter NfcAdapter1;
+//	private NfcAdapter NfcAdapter1;
 	public double km;
+//	protected NfcAdapter nfcAdapter;
+//	protected PendingIntent nfcPendingIntent;
 	LocationManager locationManager;
 	
 	static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 0; // in Meters
-	static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000;
+	static final long MINIMUM_TIME_BETWEEN_UPDATES = 0;
 	Intent i;
-	private void vibrate() {
-	
-		
-		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;
-		vibe.vibrate(500);
-	}
 	
 	
 	private PlaceEventListener placeEventListener = new PlaceEventListener() {
@@ -71,8 +79,75 @@ import android.widget.Toast;
     	
     	 	
     		String placeNameAndId = "id: " + event.getPlace().getId() + " name: " + event.getPlace().getPlaceName();
+    		if(event.getEventType().equals(event.PLACE_EVENT_TYPE_LEFT))
+    		{
     		Toast toast = Toast.makeText(getApplicationContext(), placeNameAndId, Toast.LENGTH_LONG);
     		toast.show();
+    		
+    		
+    		if(MainActivity.t1!=null)
+				MainActivity.t1.setText("Last Geofence: "+event.getPlace().getPlaceName());
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		String ns = Context.NOTIFICATION_SERVICE;
+			NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
+
+			int icon = R.drawable.ic_launcher;        
+			CharSequence tickerText = "GImbal GEofence"; // ticker-text
+			long when = System.currentTimeMillis();         
+			Context context = getApplicationContext();     
+			CharSequence contentTitle = "Gimbal breaked..!!";  
+			CharSequence contentText = placeNameAndId;      
+			Intent notificationIntent = new Intent(MyService.this, MainActivity.class);
+			PendingIntent contentIntent = PendingIntent.getService(MyService.this, 0, notificationIntent, 0);
+			Notification notification = new Notification(icon, tickerText, when);
+			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+			// and this
+			final int HELLO_ID = 1;
+			mNotificationManager.notify(HELLO_ID, notification);
+    		
+    		
+    		
+			
+			
+			
+			
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
+    		
     		//vibrate();
     		
     		Log.i("found place", placeNameAndId);
@@ -87,33 +162,41 @@ import android.widget.Toast;
 				Taglist1=Taglist1+myTag.toString()+",";
 			else
 				Taglist1=Taglist1+"r";*/
-    		
+    		String tempstr="";
     		JSONObject json = new JSONObject(); 
+    		JSONObject json1 = new JSONObject(); 
+    		
 			try {
 				JSONObject jo=new JSONObject();
-				jo.put("lat:", latitude);
-				jo.put("long:", longitude);
-				json.put("current_loc:", jo);
-				json.put("id:",  event.getPlace().getId());
+				json.put("format",  "break");
+				tempstr+=json;
+				tempstr+="\r\n";
+				
+				
+				jo.put("stop_id",  event.getPlace().getId());
 
-				json.put("place:", event.getPlace().getPlaceName()); 
-				long timestamp = System.currentTimeMillis();
-				json.put("time_stamp:", timestamp);
+				jo.put("stop_name", event.getPlace().getPlaceName()); 
+				long timestamp1 = System.currentTimeMillis();
+				String timestamp=Long.toString(timestamp1);
+				jo.put("time_stamp", timestamp);
 
-				json.put("tagid:",Taglist1);
+				//json.put("tagid:",Taglist1);
 				
 				
 				TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE); 
 				
-				json.put("trip_id:",telephonyManager.getDeviceId());
-
-				new send1().execute(json);
+				jo.put("trip_id:",telephonyManager.getDeviceId());
+				json1.put("broken", jo);
+				tempstr+=json1;
+				tempstr+="\r\n";
+				new send1().execute(tempstr);
 
 			} catch (JSONException e) {
 // TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	}
+    }
 	};
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -128,7 +211,7 @@ import android.widget.Toast;
 		 super.onStartCommand(intent, flags, startId);
 		 return START_STICKY;
      }
-	 NfcAdapter mNfcAdapter;
+	
 	private ContextCoreConnector contextCoreConnector;
       
 	private ContextPlaceConnector contextPlaceConnector;
@@ -140,14 +223,104 @@ import android.widget.Toast;
 		 Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
 		
 	 }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	private String getTextData(byte[] payload) {
+		  if(payload == null)
+		    return null;
+		  try {
+		    String encoding = ((payload[0] & 0200) == 0) ? "UTF-8" : "UTF-16";
+		    int langageCodeLength = payload[0] & 0077;
+		    return new String(payload, langageCodeLength + 1, payload.length - langageCodeLength - 1, encoding);    
+		  } catch(Exception e) {
+		    e.printStackTrace();
+		  }
+		  return null;
+		}
+	
+	
+
+	public String[] loadArray(String arrayName, Context mContext) {  
+	    SharedPreferences prefs = mContext.getSharedPreferences("preferencename", 0);  
+	    int size = prefs.getInt(arrayName + "_size", 0);  
+	    String array[] = new String[size];  
+	    for(int i=0;i<size;i++)  
+	        array[i] = prefs.getString(arrayName + "_" + i, null);  
+	    return array;  
+	}  
+	
+	
+	
+	
 	public void onCreate() {
 		// subscribeToLocationUpdates();
 		
 		
+	
+	
 		
-		i=new Intent();
+//		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+//		nfcPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, this.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+//		
+		try{
+			
+			factory = new ConnectionFactory();
+			factory.setHost("54.89.248.120");
+			// my internet connection is a bit restrictive so I have use an
+			// external server
+			// which has RabbitMQ installed on it. So I use "setUsername"
+			// and "setPassword"
+			factory.setUsername("guest");
+			factory.setPassword("guest");
+			//factory.setVirtualHost("/");
+			factory.setPort(5672);
+			System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
+			connection = factory.newConnection();
+			 channel = connection.createChannel();
+			 channel1 = connection.createChannel();
+				channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+				channel1.exchangeDeclare(EXCHANGE_NAME, "direct");
 		
-		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+		
+				
+		}catch(Exception e)
+		{
+			
+		}
+		
+		 
+	       SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+	       if (prefs.getBoolean("sender", true)) {
+	           // etc
+	       
 		contextCoreConnector = ContextCoreConnectorFactory.get(this);
 	    contextPlaceConnector = ContextPlaceConnectorFactory.get(this);
 	    checkContextConnectorStatus();
@@ -169,42 +342,132 @@ import android.widget.Toast;
     // This is called every interval. (Every 10 seconds in this example)
 	    				public void onTick(long millisUntilFinished) {
     
-	    
-	    					
-	    					//Add this 
-	    		/*		if(i!=null)
-	    				{
-	    					if(i.equals(NfcAdapter.ACTION_NDEF_DISCOVERED))	
-	    					{
-	    						myTag = (Tag) i.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	    					}
-	    					else
-	    						Taglist1=Taglist1+i.getAction().toString();
-	    					if(myTag!=null)
-	    						Taglist1=Taglist1+myTag.toString()+",";
-	    					else
-	    						Taglist1=Taglist1+"r";
-	    					
-	    				}*/
+//	    					String tagid="";
+//	    					
+//	    					//Add this 
+//	    			if(i!=null)
+//	    				{
+//	    					if(i.getAction().equals(NfcAdapter.ACTION_NDEF_DISCOVERED))	
+//	    					{
+//	    						myTag = (Tag) i.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    					
+//	    						 byte[] typ,payload ;
+//	    						    NdefMessage ndefMesg;
+//	    						    Parcelable[] rawMsgs = i.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+//	    						    ndefMesg = (NdefMessage) rawMsgs[0];
+//	    						               
+//	    						    		  
+//	    						    NdefRecord[] ndefRecords = ndefMesg.getRecords();
+//	    						    int len = ndefRecords.length;
+//	    						    for (int i = 0; i < len; i++) {
+//	    						    	typ = ndefRecords[i].getType();
+//	    						    	payload = ndefRecords[i].getPayload();
+//	    						    	tagid= getTextData(payload);
+//	    						      // Toast.makeText(getApplicationContext(), tagid,Toast.LENGTH_SHORT).show();
+//	    						       
+//	    						   	}
+//	    			        	
+//	    					
+//	    							Toast.makeText(getApplicationContext(), "Connected "+tagid,Toast.LENGTH_SHORT).show();
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    						
+//	    					}
+////	    					else
+////	    						Taglist1=Taglist1+i.getAction().toString();
+////	    					if(myTag!=null)
+////	    						Taglist1=Taglist1+myTag.toString()+",";
+////	    					else
+////	    						Taglist1=Taglist1+"r";
+//	    					
+//	    				}
+//	    			else
+//	    				Toast.makeText(getApplicationContext(), "no intent",Toast.LENGTH_SHORT).show();
+//	    			
+//	    			
+//	    			
+//	    			
+//	    			
+//	    			
+//	    			
+//	    			
+	    			
+	    			
+	    					 array1=loadArray("taglist", getApplicationContext());
+	    					String tempstr="";
 	    					JSONObject json = new JSONObject(); 
+	    					JSONObject json1 = new JSONObject(); 
+	    					JSONObject json2 = new JSONObject(); 
 	    					try {
+	    					
+	    						long timestamp1 = System.currentTimeMillis();
+	    						String timestamp=Long.toString(timestamp1);
+	    						
+	    						
+	    						json2.put("format", "point");
+	    						tempstr+=json2;
+	    						tempstr+="\r\n";
+	    						
+	    						
+	    						JSONObject jo1=new JSONObject();
+	    						jo1.put("_index", "rabbit4");
+	    						jo1.put("_type", "pin");
+	    						jo1.put("_id", t1++);
+	    						json1.put("create", jo1);
+	    						tempstr+=json1;
+	    						tempstr+="\r\n";
+	    						
+	    						
+	    						
 	    						JSONObject jo=new JSONObject();
-	    						jo.put("lat:", latitude);
-	    						jo.put("long:", longitude);
-	    						json.put("current_loc:", jo);
+	    						jo.put("lat", latitude);
+	    						jo.put("lng", longitude);
+	    						json.put("location", jo);
+	    						
+	    						
+	    						
 
 	    			    		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE); 
-	    						long timestamp = System.currentTimeMillis();
-	    						json.put("time_stamp:", timestamp);
+	    						
+	    						json.put("timestamp", timestamp);
 		
-	    						json.put("version:",t1++);
-	    						json.put("trip_id:",telephonyManager.getDeviceId());
-	    						new send().execute(json);
-		
+	    						JSONArray js=new JSONArray();
+	    						for(int u=0;u<array1.length;u++)
+	    						{
+	    						js.put(array1[u]);
+	    						}
+	    						json.put("employees",js);
+	    						json.put("trip_id",telephonyManager.getDeviceId());
+	    						tempstr+=json;
+	    						tempstr+="\r\n";
+	    						//Toast.makeText(getApplicationContext(), "lat: "+latitude+" long: "+longitude, Toast.LENGTH_SHORT).show();
+	    						if(MainActivity.t!=null)
+	    						MainActivity.t.setText( "lat: "+latitude+" long: "+longitude);
+	    							
+	    							if(MainActivity.t1!=null)
+	    								MainActivity.t1.setText("Last Geofence: "+System.currentTimeMillis());
+	    							if(latitude!=0.0)
+	    							{
+	    						//System.out.println(tempstr);
+	    						new send().execute(tempstr);
+	    							}
 	    					} catch (JSONException e) {
 				// TODO Auto-generated catch block
 	    						e.printStackTrace();
 	    					}
+	    					
+	    					
     
 	    				}
 
@@ -215,7 +478,12 @@ import android.widget.Toast;
 	    		}.start();
 
 	}
-	
+	       
+
+	       
+	       
+	       
+	}
 	
 	
 	
@@ -281,6 +549,7 @@ protected void showCurrentLocation() {
 			
 		 
  Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+ 
    if (location != null) {
    loc=location;
 
@@ -333,85 +602,95 @@ protected void showCurrentLocation() {
 	
 	
 	
-	private class send extends AsyncTask<JSONObject, Void, Void> {
+	private class send extends AsyncTask<String, Void, Void> {
 
 		@Override
-		protected Void doInBackground(JSONObject... Message) {
+		protected Void doInBackground(String... Message) {
 			try {
 				//Toast.makeText(getApplicationContext(), "click",Toast.LENGTH_SHORT).show();
 				
-				ConnectionFactory factory = new ConnectionFactory();
-				factory.setHost("54.80.250.130");
-				// my internet connection is a bit restrictive so I have use an
-				// external server
-				// which has RabbitMQ installed on it. So I use "setUsername"
-				// and "setPassword"
-				factory.setUsername("guest");
-				factory.setPassword("guest");
-				//factory.setVirtualHost("/");
-				factory.setPort(5672);
-				System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
-				Connection connection = factory.newConnection();
-				Channel channel = connection.createChannel();
 				
-				channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+				
 				//channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 				String tempstr="";
 				for(int i=0;i<Message.length;i++)
 					tempstr+=Message[i];
 				
-
+				if(channel==null)
+				{
+					
+					factory = new ConnectionFactory();
+					factory.setHost("54.89.248.120");
+					// my internet connection is a bit restrictive so I have use an
+					// external server
+					// which has RabbitMQ installed on it. So I use "setUsername"
+					// and "setPassword"
+					factory.setUsername("guest");
+					factory.setPassword("guest");
+					//factory.setVirtualHost("/");
+					
+					factory.setPort(5672);
+					System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
+					connection = factory.newConnection();
+					 channel = connection.createChannel();
+					channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+				}
 				channel.basicPublish(EXCHANGE_NAME, "key", null,
 						tempstr.getBytes());
+				
 				System.out.println("\nsend message:"+tempstr);
-				channel.close();
-
-				connection.close();
-
+				
 			} catch (Exception e) {
 				// TODO: handle exception
+				
+				
 				e.printStackTrace();
 			
 			}
 			// TODO Auto-generated method stub
 			return null;
 		}
+		
+		
+		
+		
 
 	}
-	private class send1 extends AsyncTask<JSONObject, Void, Void> {
+	private class send1 extends AsyncTask<String, Void, Void> {
 
 		@Override
-		protected Void doInBackground(JSONObject... Message) {
+		protected Void doInBackground(String... Message) {
 			try {
 				//Toast.makeText(getApplicationContext(), "click",Toast.LENGTH_SHORT).show();
 				
-				ConnectionFactory factory = new ConnectionFactory();
-				factory.setHost("54.80.250.130");
-				// my internet connection is a bit restrictive so I have use an
-				// external server
-				// which has RabbitMQ installed on it. So I use "setUsername"
-				// and "setPassword"
-				factory.setUsername("guest");
-				factory.setPassword("guest");
-				//factory.setVirtualHost("/");
-				factory.setPort(5672);
-				System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
-				Connection connection = factory.newConnection();
-				Channel channel1 = connection.createChannel();
 				
-				channel1.exchangeDeclare(EXCHANGE_NAME, "direct");
 				//channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 				String tempstr="";
 				for(int i=0;i<Message.length;i++)
 					tempstr+=Message[i];
 				
-
-				channel1.basicPublish(EXCHANGE_NAME, "key1", null,
+				if(channel1==null)
+				{
+					
+					factory = new ConnectionFactory();
+					factory.setHost("54.89.248.120");
+					// my internet connection is a bit restrictive so I have use an
+					// external server
+					// which has RabbitMQ installed on it. So I use "setUsername"
+					// and "setPassword"
+					factory.setUsername("guest");
+					factory.setPassword("guest");
+					//factory.setVirtualHost("/");
+					factory.setPort(5672);
+					System.out.println(""+factory.getHost()+factory.getPort()+factory.getRequestedHeartbeat()+factory.getUsername());
+					connection = factory.newConnection();
+					 channel1 = connection.createChannel();
+					channel1.exchangeDeclare(EXCHANGE_NAME, "direct");
+				}
+				channel1.basicPublish(EXCHANGE_NAME, "key", null,
 						tempstr.getBytes());
 				System.out.println("\nsend message:"+tempstr);
-				channel1.close();
-
-				connection.close();
+				
 
 			} catch (Exception e) {
 				// TODO: handle exception
@@ -425,6 +704,24 @@ protected void showCurrentLocation() {
 		
 	}
     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 }
