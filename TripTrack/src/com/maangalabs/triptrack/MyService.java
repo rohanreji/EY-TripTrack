@@ -67,7 +67,7 @@ import android.widget.Toast;
 //	protected PendingIntent nfcPendingIntent;
 	LocationManager locationManager;
 	
-	static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 0; // in Meters
+	static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 2; // in Meters
 	static final long MINIMUM_TIME_BETWEEN_UPDATES = 0;
 	Intent i;
 	
@@ -337,7 +337,7 @@ import android.widget.Toast;
 	    		new MyLocationListener());
 	    
 
-	    		CountDownTimer t = new CountDownTimer( Long.MAX_VALUE , 10000) {
+	    		CountDownTimer t = new CountDownTimer( Long.MAX_VALUE , 2000) {
 
     // This is called every interval. (Every 10 seconds in this example)
 	    				public void onTick(long millisUntilFinished) {

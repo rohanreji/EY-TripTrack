@@ -4,88 +4,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-      <ViewFlipper
-            android:id="@+id/view_flipper1"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_margin="6dip" >
-              <RelativeLayout 
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-     <Button
-        android:id="@+id/button1"
-        
-        
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-       	android:background="#e74c3c"
-       	android:layout_marginTop="5dp"
-        android:layout_marginLeft="63dp"
-        android:text="show nearby stops"
-        
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textColor="#fff"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
-        android:onClick="shownear"
-        />
 
     <ListView
         android:id="@+id/listView2"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/button1"
-        android:visibility="invisible"
+        android:layout_above="@+id/button1"
+      
         android:layout_alignParentLeft="true"
         >
-    </ListView>
+           </ListView>
 
-   </RelativeLayout>
-   
-              
-              <RelativeLayout 
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="#e74c3c"
+        android:gravity="center"
+        android:onClick="back"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:text="search another"
+        android:textAlignment="center"
+        android:textColor="#fff" />
 
-    <TextView
-        android:id="@+id/help1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="16dp"
-        android:text="go back"
-        android:onClick="goBack"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-     <TextView
-        android:id="@+id/help1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="16dp"
-        android:text="go back"
-        android:onClick="goBack"
-        android:clickable="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-     
-      <TextView
-        android:id="@+id/help2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/help1"
-        android:layout_below="@+id/help1"
-        android:layout_marginTop="17dp"
-        android:text="Select your destination"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-</RelativeLayout>
- </ViewFlipper>
 </RelativeLayout>

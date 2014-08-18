@@ -18,10 +18,13 @@ import com.neopixl.pixlui.components.button.Button;
 import com.neopixl.pixlui.components.edittext.EditText;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -40,40 +43,66 @@ import android.widget.ViewFlipper;
   */
 @SuppressLint("NewApi") public class FavFragment extends Fragment implements onRefreshListener {
 	String names="no cabs!";
-	View rootView;
+	View v;
 	CabAdapter adapter;
 	static ViewFlipper viewFlipper;
 	 ListView l;
-	 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-     
-     Paint paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
-     Paint paint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
- 
-      rootView = inflater.inflate(R.layout.fav_layout, container, false);
-      viewFlipper = (ViewFlipper) rootView.findViewById(R.id.view_flipper1);
-      TextView t=(TextView)rootView.findViewById(R.id.help1);
-		
-		Typeface tf=Typeface.createFromAsset(getActivity().getAssets(),"font/font1.ttf");
-		t.setTypeface(tf);
-        Log.d("tag1", "invalidate");
-       // container.removeAllViews();
-      
-     
-    //   l=(ListView)rootView.findViewById(R.id.listView1);
-        return rootView;
-    }
+	
+
+    	@Override
+    	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    		
+    		 
+    		 
+    	
+    		 	
+    			  
+    		 		v = inflater.inflate(R.layout.fav_layout, container, false);
+    		  			
+    		
+    	    	
+    	
+    		 	return v;
+    		}
+    	
+    		@Override
+    		public void onResume() {
+    			//mapView.onResume();
+    			super.onResume();
+    		}
+    		@Override
+    		public void onDestroy() {
+    			super.onDestroy();
+    			//	mapView.onDestroy();
+    		}
+    		@Override
+    		public void onLowMemory() {
+    			super.onLowMemory();
+    			//	mapView.onLowMemory();
+    		}
+
+    		@Override
+    		public void onRefresh() {
+			// TODO Auto-generated method stub
+			
+    		}
+    		public boolean haveNetworkConnection() {
+    			boolean haveConnectedWifi = false;
+    			boolean haveConnectedMobile = false;
+
+    			ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+    			NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+    			for (NetworkInfo ni : netInfo) {
+    				if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+    					if (ni.isConnected())
+    						haveConnectedWifi = true;
+    					if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+    						if (ni.isConnected())
+    							haveConnectedMobile = true;
+    			}
+    			return haveConnectedWifi || haveConnectedMobile;
+		 }
     
-	@Override
-	public void onRefresh() {
-		// TODO Auto-generated method stub
-		
-		
-		 
-		
-	}
     
   
 	
@@ -185,7 +214,7 @@ import android.widget.ViewFlipper;
 	                    // adapter.notifyDataSetChanged();
 	              
 	                     
-	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView2);
+	         ListView listView1 = (ListView)v.findViewById(R.id.listView2);
 	                      
 	                  //  adapter.notifyDataSetChanged();
 	         listView1.setAdapter(adapter);
@@ -207,7 +236,7 @@ import android.widget.ViewFlipper;
 	                    // adapter.notifyDataSetChanged();
 	              
 	                     
-	         ListView listView1 = (ListView)rootView.findViewById(R.id.listView2);
+	         ListView listView1 = (ListView)v.findViewById(R.id.listView2);
 	                      
 	                  //  adapter.notifyDataSetChanged();
 	         listView1.setAdapter(adapter);

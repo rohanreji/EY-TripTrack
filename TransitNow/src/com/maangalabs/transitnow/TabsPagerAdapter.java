@@ -20,7 +20,7 @@ public class TabsPagerAdapter extends FragmentStatePagerAdapter {
         	
             return new HomeFragment();
             
-     /*   case 1:
+      case 1:
             // Games fragment activity
         	//new FavFragment().new LongOperation().execute(" ");
             return new FavFragment();
@@ -39,7 +39,7 @@ public class TabsPagerAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         // get item count - equal to number of tabs
      //   return 3;
-    	return 1;
+    	return 2;
     }
     @Override
     public int getItemPosition(Object object) {

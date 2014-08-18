@@ -7,66 +7,45 @@
   
 
        
+ <RelativeLayout
+       android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+   >
 
-         <RelativeLayout
-             android:id="@+id/relativeLayout3"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             
-              >
-             
-             <TextView
-                 android:id="@+id/textView10"
-                 android:layout_width="fill_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_alignParentTop="true"
-                 android:layout_centerHorizontal="true"
-                 android:textColor="#fff"
-                 android:text="Jane Doe"
-                  android:textAlignment="center"
-                  android:gravity="center"
-                  android:paddingTop="20dp"
-                  android:paddingBottom="20dp"
-                 android:background="#e74c3c"
-                  android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-           <!-- 
-                <ListView
-        android:id="@+id/listView1"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
-       android:layout_below="@+id/textView10" >
-    </ListView>
-             
-     -->
-              <TextView
-         android:id="@+id/textView5"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_below="@+id/textView10"
-         android:layout_alignParentLeft="true"
-         
-         android:layout_marginLeft="14dp"
-         android:text="Bus Number: 401"
-        
-         android:textAppearance="?android:attr/textAppearanceMedium" />
-             
-         </RelativeLayout>
-  
-
-     <TextView
-         android:id="@+id/textView4"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_above="@+id/viewFlipper"
-         android:layout_alignParentLeft="true"
-         android:layout_marginBottom="17dp"
-         android:layout_marginLeft="14dp"
-         android:text=" "
-         android:textColor="#fff"
-         android:textAppearance="?android:attr/textAppearanceMedium" />
      
+       <Button
+        android:id="@+id/button111"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="#e74c3c"
+        android:gravity="center"
+        android:onClick="subs1"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:text="find cabs"
+        android:textAlignment="center"
+        android:textColor="#fff" />
+
+       <Spinner
+           android:id="@+id/toDrop"
+           android:layout_width="fill_parent"
+           android:layout_height="wrap_content"
+           android:layout_alignParentLeft="true"
+           android:layout_below="@+id/fromDrop"
+           android:layout_marginTop="22dp" />
+
+       <Spinner
+           android:id="@+id/fromDrop"
+           android:layout_width="fill_parent"
+           android:layout_height="wrap_content"
+           android:layout_alignParentLeft="true"
+           android:layout_alignParentTop="true"
+           android:layout_marginTop="21dp" />
+       
+   </RelativeLayout>
     
 
 </RelativeLayout>

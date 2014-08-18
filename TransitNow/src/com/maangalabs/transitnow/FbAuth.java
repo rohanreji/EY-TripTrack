@@ -461,7 +461,7 @@ public class FbAuth extends Activity {
 	        		
 	        	 EditText e1=(EditText)findViewById(R.id.editText1);
 				 String sender1=e1.getText().toString();
-	            GMailSender sender = new GMailSender("rohanreji93@gmail.com", "password");
+	            GMailSender sender = new GMailSender("rohanreji93@gmail.com", "squarednotcubed1!");
 	            try {
 	            	Random rn = new Random();
 	            	int n = 888888 + 1;
@@ -495,6 +495,13 @@ public class FbAuth extends Activity {
 	    	            viewFlipper.setOutAnimation(FbAuth.this, R.anim.out_to_left);
 	    	            // Show The Previous Screen
 	    	            viewFlipper.showNext();
+	    	            
+	    	            EditText e1=(EditText)findViewById(R.id.editText1);
+	    	            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(FbAuth.this);
+    	        		SharedPreferences.Editor editor = preferences.edit();
+    	        		editor.putString("emailuser",e1.getText().toString());
+    	        		editor.commit();
+	    	            
 	    		}
 	    		else
 	    		{
